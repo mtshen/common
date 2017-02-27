@@ -1,0 +1,55 @@
+[showEllipsis] {
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+}
+
+.showEllipsis {
+    position: absolute;
+    z-index: 1070;
+    display: block;
+    font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+    font-size: 12px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 1.42857143;
+    text-align: left;
+    text-decoration: none;
+    text-shadow: none;
+    text-transform: none;
+    letter-spacing: normal;
+    word-break: normal;
+    word-spacing: normal;
+    word-wrap: normal;
+    white-space: normal;
+    opacity: .9;
+    line-break: auto;
+    left: 0;
+    padding: 5px 0;
+    margin-top: 3px;
+    transition: opacity .15s linear;
+}
+
+.showEllipsis > .after{
+    border-width: 0 5px 5px;
+    border-style: solid;
+    border-color: transparent;
+    border-bottom-color: #d6dbe2;
+    top: 0;
+    margin-left: -5px;
+    position: absolute;
+    width: 0;
+    height: 0;
+}
+
+.showEllipsis > .content {
+    white-space: inherit;
+    position: relative;
+    background-color: #d6dbe2;
+    color: #555;
+    max-width: 300px;
+    padding: 3px 5px;
+    text-align: left;
+    z-index: 9999;
+    border-radius: 4px;
+}

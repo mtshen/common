@@ -1,0 +1,18 @@
+// 取消部分浏览器选中的默认高亮效果
+.cancelHighlight{
+    text-decoration: none;
+    outline: none;
+}
+
+.text-space{   // 多余文本溢出省略号
+    overflow: hidden;
+    text-overflow:ellipsis;
+    white-space: nowrap;
+}
+
+.text-line-clamp{ // 多余文本溢出省略号,多行 只适用于-webkit-
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;  // 行数
+    overflow: hidden;
+}
