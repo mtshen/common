@@ -14,5 +14,8 @@
 ## ./showTitle
 ##### 使用原生javascript 模拟jquery-tooltip功能, 并支持实时的检测
 
+## ./formSubmit
+##### 使用原生javascript 实现获取一个表单元素, 并且做出一系列扩展, 支持脱离form 菜单
+
 ## 更多
 ##### 更多使用功能正在整理中...
