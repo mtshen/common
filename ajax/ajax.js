@@ -1,6 +1,6 @@
 /*  request
     url:  {String} 发送请求的地址
-    type: {String} 默认为get, 请求方式(post或get)
+    type: {String} 默认为form, 请求方式(form|post|get)
     timeout: {Number} 设置请求超时时间(毫秒)
     cache: {Boolean} 默认为true, 设置为false将不会从浏览器缓存中加载请求信息
     data: {object} 发送到服务器的数据
@@ -9,11 +9,12 @@
         json：返回一个对象
         text：返回纯文本字符串
     contentType：{String} 当发送信息至服务器时,内容编码类型默认为"application/x-www-form-urlencoded".该默认值适合大多数应用场合.
+    traditional：{Boolean} 是否传统序列化
     autoHide: {Boolean} 请求完毕后是否不等待其他代码,直接结束loading
     bind: {string|element} loading绑定的父元素
     loading: {Function} loading的html,或元素
     httpHeader : {object} 发送的http请求头, 以键值对的形式传入
-    mosaic : {array} 如果发送的是get请求,mosaic参数将作为参数的模板,默认为 ['&', '=', '?']
+    mosaic : {array} 如果发送的是get请求,mosaic参数将作为参数的模板,默认为 ['&', '=', '?'] *禁用*
     beforeSend：{Function} 发送请求前可以修改XMLHttpRequest对象的函数
     complete：{Function} 请求完成后调用的回调函数(请求成功或失败时均调用)
     success：{Function} 请求成功后调用的回调函数
@@ -24,12 +25,13 @@ var request = (function() {
     // 全局设置,可以被更改
     var commonOption = {
         url: '',
-        type: 'post',
+        type: 'form',
         timeout: 0,
         cache: true,
         data: {},
-        dataType: 'text',
+        dataType: 'json',
         contentType: 'application/x-www-form-urlencoded',
+        traditional: false,
         autoHide: true,
         bind: 'body',
         loading: '',
@@ -85,6 +87,67 @@ var request = (function() {
         }
         return nOption;
     };
+
+    function buildParams(prefix, obj, traditional = commonOption.traditional, add) {
+        var name;
+        if (Array.isArray(obj)) {
+            obj.forEach(function(v, i) {
+                if (traditional || /\[\]$/.test(prefix)) {
+                    // Treat each array item as a scalar.
+                    add(prefix, v);
+                } else {
+                    // Item is non-scalar (array or object), encode its numeric index.
+                    buildParams(
+                        prefix + '[' + (typeof v === 'object' && v != null ? i : '') + ']',
+                        v,
+                        traditional,
+                        add
+                    );
+                }
+            });
+
+        } else if (!traditional && __is(obj) === 'object') {
+            // Serialize object item.
+            for (name in obj) {
+                buildParams(prefix + '[' + name + ']', obj[ name ], traditional, add);
+            }
+        } else {
+            // Serialize scalar item.
+            add(prefix, obj);
+        }
+    }
+
+    function param(a, traditional = commonOption.traditional) {
+        var prefix;
+        var s = [];
+        var add = function(key, valueOrFunction) {
+
+                // If value is a function, invoke it and use its return value
+                var value = typeof valueOrFunction === 'function' ?
+                    valueOrFunction() :
+                    valueOrFunction;
+
+                s[ s.length ] = encodeURIComponent(key) + '=' +
+                    encodeURIComponent(value == null ? '' : value);
+            };
+
+        // If an array was passed in, assume that it is an array of form elements.
+        if (__is(a) === 'array') {
+            // Serialize the form elements
+            a.forEach(a, function(v) {
+                add(v.name, v.value);
+            });
+        } else {
+            // If traditional, encode the "old" way (the way 1.3.2 or older
+            // did it), otherwise encode params recursively.
+            for (prefix in a) {
+                buildParams(prefix, a[ prefix ], traditional, add);
+            }
+        }
+        // Return the resulting serialization
+        return s.join('&');
+    };
+
     /**
      * 深度拷贝数据
      * 改变返回的数据不会对原始数据造成影响
@@ -123,7 +186,11 @@ var request = (function() {
         let [mosaic0, mosaic1, mosaic2] = mosaic;
         let str = [mosaic2];
         for (var k in data) if (data.hasOwnProperty(k)) {
-            str.push(k + mosaic1 + data[k]);
+            var _d = data[k];
+            if (typeof _d === 'object') {
+                _d = encodeURIComponent(JSON.stringify(_d));
+            }
+            str.push(k + mosaic1 + _d);
             str.push(mosaic0);
         }
         str.pop();
@@ -180,7 +247,7 @@ var request = (function() {
             }
 
             // 拼接 get_url
-            var url = getMergeUrl(option.url, option.mosaic, option.data);
+            var url = option.url + param(option.data);
 
             // 设置延时
             request.timeout = option.timeout;
@@ -259,8 +326,70 @@ var request = (function() {
 
             // 用户自定义
             option.beforeSend(request);
+            request.send(JSON.stringify(option.data));
 
-            request.send(getMergeUrl('', option.mosaic, option.data).slice(1));
+            var oldTimer = +new Date();
+
+            var packingRequest = new PackingRequest(request, {
+                option: option,
+                startTime: oldTimer,
+                trigger: request,
+                bind: bind
+            });
+
+            request.ontimeout = function() {
+                const newTimer = +new Date() - oldTimer;
+                option.autoHide && packingRequest.hide();
+                option.error.call(packingRequest, {
+                    error: 'delayed',
+                    target: request,
+                    time: newTimer
+                });
+            };
+
+            request.onreadystatechange = function(even) {
+                requestCallback.call(this, even, option, {time: oldTimer, packingRequest: packingRequest});
+            };
+
+            return packingRequest;
+        },
+        form: function(option) {
+            // 得到option常用值
+            var request = new XMLHttpRequest;
+
+            // 加载loading
+            var bind = getLoadingMain(option.bind);
+            var loading = getLoadingElement(option.loading);
+            if (loading && bind) {
+                bind.forEach(function(v) {
+                    var dom = loading.cloneNode(true);
+                    dom.setAttribute('request-loadingElement', 'true');
+                    v.appendChild(dom);
+                });
+            }
+
+            // 设置延时
+            option.timeout && (request.timeout = option.timeout);
+
+            // 发送post请求
+            request.open('post', option.url);
+
+            // 设置内容编码
+            request.setRequestHeader('Content-Type', option.contentType);
+
+            // 设置是否缓存
+            option.cache && request.setRequestHeader('If-Modified-Since', '0');
+
+            // 设置请求头
+            setHttpHeader(request, option.httpHeader);
+
+            // 用户自定义
+            option.beforeSend(request);
+
+            var sendData = new FormData();
+            var $data = option.data;
+
+            request.send(param($data));
 
             var oldTimer = +new Date();
 
@@ -382,8 +511,6 @@ var request = (function() {
                 return false;
         }
     };
-
     main.option = commonOption;
-
     return main;
 })();

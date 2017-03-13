@@ -1,6 +1,17 @@
-var showTitle = (function () {
+var showTitle = (function() {
     document.body.addEventListener('mouseover', showTitle);
     document.body.addEventListener('mouseout', hideTitle);
+
+    function getScrollTops(dom) {
+        return document.body.scrollTop;
+        // var num = dom.scrollTop;
+        // var par = dom.parentNode;
+        // while(par !== document) {
+        //     num += par.scrollTop;
+        //     par = par.parentNode;
+        // }
+        // return num;
+    }
     var getHtml = (option) => `
         <div class="showEllipsis" style="top: ${option.top}px; left: ${option.left}px">
         <div class="after" style="left: ${option.after}"></div><div class="content">${option.content}</div></div>`;
@@ -30,24 +41,37 @@ var showTitle = (function () {
         return (w1 - w2 > 0);
     };
 
+    function isdropDown(dom) {
+        var dropDown = dom;
+        while (dropDown && dropDown.hasAttribute && !dropDown.hasAttribute('menu')) {
+            dropDown = dropDown.parentNode;
+        }
+        if (!dropDown || dropDown === document) return false;
+        var flag = dropDown.getAttribute('ellipsis-find');
+        return flag && dropDown.querySelector(flag);
+    };
+
     function showTitle(even) {
         even = even || window.event;
         var _this = even.target;
         var isShowEllipsis = _this.hasAttribute('showEllipsis');
         var showEllipsisText = _this.getAttribute('showEllipsis');
+
+        if (isdropDown(_this)) {
+            return true;
+        };
+
         if (isShowEllipsis && showEllipsisText) {
+
             var textData = document.defaultView.getComputedStyle(_this);
             var w1 = textLength(showEllipsisText, {
-                size: textData.fontSize,
-                spacing: textData.wordSpacing,
-                indent: textData.textIndent,
-                family: textData.fontFamily
+                size: '12px'
             });
             var zb = _this.getBoundingClientRect();
             var box = getElement(getHtml({
                 content: showEllipsisText,
                 left: zb.left - (w1 / 2) + (_this.offsetWidth / 2),
-                top: zb.top + _this.offsetHeight,
+                top: zb.top + _this.offsetHeight + getScrollTops(_this),
                 after: '50%'
             }));
             document.body.appendChild(box);
@@ -88,13 +112,13 @@ var showTitle = (function () {
     }
 
     return {
-        off: function () {
+        off: function() {
             document.body.removeEventListener('mouseover', showTitle);
             document.body.removeEventListener('mouseout', hideTitle);
         },
-        on: function () {
+        on: function() {
             document.body.addEventListener('mouseover', showTitle);
             document.body.addEventListener('mouseout', hideTitle);
         }
-    }
+    };
 })();

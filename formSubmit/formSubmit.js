@@ -30,9 +30,8 @@ function form(dom, option={}) {
             eachFn = (dom) => value(dom);
             break;
         default:
-            eachFn = (dom) => 
-                    dom[(['input', 'textarea', 'select'].indexOf(dom.nodeName.toLowerCase())
-                    > -1 ? 'value' : 'innerHTML')];
+            eachFn = (dom) => dom.hasAttribute('value') ?
+                dom.value : (dom.value || dom.innerHTML);
             break;
     }
 
@@ -40,14 +39,20 @@ function form(dom, option={}) {
         return false;
 
     domlist && domlist.forEach(function(v) {
+        if (v.nodeName.toLowerCase() == 'input' &&
+                ['checkbox', 'radio'].indexOf(v.getAttribute('type')) !== -1 &&
+                !v.checked) {
+            return;
+        }
+        if (v.getAttribute('form-hide') === 'yes') return;
         var key = v.getAttribute(nameFlag);
         var dataType = v.getAttribute(type);
-        if(v.hasAttribute(main)){
-            data[key] = (dataType === 'array'? [] : {});
-            getData(dom, option, data[key], v.getAttribute(main));
+        if (v.hasAttribute(main)) {
+            data[key] = (dataType === 'array' ? [] : {});
+            form(dom, option, data[key], v.getAttribute(main));
         } else {
             var vData = eachFn(v);
-            switch(v.getAttribute(type)){
+            switch (v.getAttribute(type)){
                 case 'string':
                     vData += '';
                     break;
@@ -64,7 +69,7 @@ function form(dom, option={}) {
                     vData = !!vData;
                     break;
             }
-            if(data.length !== undefined){
+            if (data.length !== undefined) {
                 data.push(vData);
             } else {
                 data[key] =  vData;
