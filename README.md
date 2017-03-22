@@ -1,4 +1,8 @@
 # common 常用的样式或js
+> 样式可能是在网上发现的,
+> 但js全部为自己编写, 且不需要依赖其他类库
+---
+
 ## ./commonCss
 ##### 存储了一些常用的css样式, 包括less和编译完成的css
 
@@ -90,6 +94,40 @@ form(document.getElementById('rg-content'));
 - isEmailBlackList() 能够检查是否是企业邮箱(在emailBlackList中做排除)
 - bindReSize() 为元素绑定resize事件(目前只能判断窗口变化时, dom元素的大小是否发生了变化)
 - cancelReSize() 解绑resize事件
+
+## ./dataStructure
+##### 提供了一个存储数据库的结构
+ - option 配置
+ `repeat: 是否去重, 默认为true, 如果该参数为true 那么g参数则为false`
+ `key: 作为 搜索的key 不设置key,无法进行去重`
+ `weakCheck: 是否深度匹配 (在对比2个对象或数组时,是否要保证数据的一致性) 默认为 true [如果对比将消耗相当的内存]`
+ `callback: 内容被修改之后的回掉函数, 修改之前不会产生回调`
+ `intercept: 在数据修改/加入之前的回调函数, 如果返回false, 则不会加入, 可以修改传入的data`
+ `cover: 如果出现重复的值是否覆盖`
+ `g: 是否作为全局匹配,如果为false只匹配第一个成功匹配的值`
+ - 创建
+ ```
+ var data = new DataStructure({key: 'id'});
+ ```
+
+ - 属性
+ ```
+ data.length; // 该变量中存储的数据个数
+
+ ```
+
+ - 方法(未整理)
+ ```
+ set, get, indexOf, has, clear, setOption, debug
+ ```
+
+## ./waterfall(requireJS)
+##### 提供了table的瀑布流动态加载, 以及几个瀑布流之前的内容切换, 第二次加载无需发送请求
+
+- 方法(未整理)
+```
+add, check, show, hide, gGetData, gCacheHtml, external, debug, html, remove, init
+```
 
 
 ## 更多
