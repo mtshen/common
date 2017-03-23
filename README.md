@@ -128,7 +128,26 @@ form(document.getElementById('rg-content'));
 ```
 add, check, show, hide, gGetData, gCacheHtml, external, debug, html, remove, init
 ```
+## ./attribute
+##### 对传统getAttribute及setAttribute进行封装, 不再从元素中进行读取和存储, 使读数据速度更快, 存储时也可以存储任何内容
+- set
+```
+ attr(element).set('key', new Date);
+ // or
+ attr(element).set({key: new Date});
+```
 
+- get
+```
+ attr(element).get('key'); // Thu Mar 23 2017 11:47:10 GMT+0800 (中国标准时间)
+ // or
+ attr(element).get().key; // Thu Mar 23 2017 11:47:10 GMT+0800 (中国标准时间)
+```
+
+- has
+```
+ attr(element).has('key'); // true
+```
 
 ## 更多
 ##### 更多使用功能正在整理中...
