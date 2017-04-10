@@ -1,31 +1,32 @@
-# common 常用的样式或js
-> 样式可能是在网上发现的,
-> 但js全部为自己编写, 且不需要依赖其他类库
+# common 常用js
+> 自己造的轮子
 ---
-
-## ./commonCss
-##### 存储了一些常用的css样式, 包括less和编译完成的css
-
-## ./error
-##### 一个提供抛出一组错误的error.js文件
-- 格式为 throwError('组标题', '错误日志[数组]', '类型,可选[error, log, info]');
+## ./tempate
+##### 使用原生javascript实现模板引擎
+##### 超小体积 无压缩 < 1KB
+- Template();
+示例:
+HTML:
 ```
-    throwError('error',[
-        'log: xxxxx',
-        'log: xxxxx',
-        'log: xxxxx'
-    ], 'log');
+<div id="main"></div>
+<script type="text/template" id="template">
+    <ul>
+    <% for(var i = 0; i < 10; i ++) { %>
+        <li><%= self[i].name %><li>
+    <% } %>
+    <ul>
+</script>
 ```
-
-## ./getStyle `兼容低版本浏览器`
-##### 使用原生javascript实现获取css样式的值
-- getStyle(元素, 'css样式');
+javascript:
 ```
-getStyle(dom, 'height');
+var tpl = Template(document.getElementById('template').innerHTML);
+var html = tpl(['a', 'b', 'c']);
+document.getElementById('main').innerHTML = html;
 ```
 
 ## ./ajax
-##### 使用原生javascript实现ajax
+##### 使用原生javascript实现ajax, 不依赖插件
+##### 使用方法与jquery类似
 - request(option);
 
 ###### option 可选字段
@@ -58,19 +59,67 @@ request({
     }
 });
 ```
+
 ## ./showTitle
-##### 使用原生javascript 模拟jquery-tooltip功能, 并支持实时的检测
+##### 使用原生javascript 模拟jquery-tooltip功能,
+##### 支持实时的检测和过滤,并且优化了使用和性能
 - 更新修改了一个滚动条下出现错位的BUG
 
-1.超出提示title,例子
+1.文本超出父元素, 超出文本被... 代替, 鼠标移入提示全部文本 
+例:
 ```
 <p showellipsis>1000</p>
 ```
 
-2.如果需要不超出也能显示提示, 且显示内容固定
+2.如果需要一个固定提示
 ```
 <p showellipsis="显示的内容">1000</p>
 ```
+
+## ./miscellaneous
+##### 提供了一些常用的API, 比较杂, 没有进行归类
+- 常量 emailBlackList 提供了比较全的共用邮箱后缀
+- isEmail() 能够检查是否是邮箱
+- isMobileFormat() 能够检查是否是手机号
+- isEmailBlackList() 能够检查是否是企业邮箱(在emailBlackList中做排除)
+- bindReSize() 为元素绑定resize事件
+- cancelReSize() 解绑resize事件
+
+
+## ./attribute
+##### 对传统getAttribute及setAttribute进行封装,
+##### 不再从元素中进行读取和存储, 使读数据速度更快, 存储时也可以存储任意类型数据
+##### 类似于jquery的$().data()加强版
+- set
+```
+ attr(element).set('key', new Date);
+ // or
+ attr(element).set({key: new Date});
+```
+
+- get
+```
+ attr(element).get('key'); // Thu Mar 23 2017 11:47:10 GMT+0800 (中国标准时间)
+ // or
+ attr(element).get().key; // Thu Mar 23 2017 11:47:10 GMT+0800 (中国标准时间)
+```
+
+- has
+```
+ attr(element).has('key'); // true
+```
+
+## ./error
+##### 一个提供抛出一组错误的error.js文件
+- 格式为 throwError('组标题', '错误日志[数组]', '类型,可选[error, log, info]');
+```
+    throwError('error',[
+        'log: xxxxx',
+        'log: xxxxx',
+        'log: xxxxx'
+    ], 'log');
+```
+
 ## ./formSubmit
 ##### 使用原生javascript 实现获取一个表单元素, 并且做出一系列扩展, 支持脱离form 菜单
 html结构
@@ -86,14 +135,12 @@ form(document.getElementById('rg-content'));
 // {a: 100,b: 200,c: 300}
 ```
 
-## ./miscellaneous
-##### 提供了一些常用的API, 比较杂, 没有进行归类
-- 常量 emailBlackList 提供了比较全的共用邮箱后缀
-- isEmail() 能够检查是否是邮箱
-- isMobileFormat() 能够检查是否是手机号
-- isEmailBlackList() 能够检查是否是企业邮箱(在emailBlackList中做排除)
-- bindReSize() 为元素绑定resize事件(目前只能判断窗口变化时, dom元素的大小是否发生了变化)
-- cancelReSize() 解绑resize事件
+## ./getStyle `兼容低版本浏览器`
+##### 使用原生javascript实现获取css样式的值
+- getStyle(元素, 'css样式');
+```
+getStyle(dom, 'height');
+```
 
 ## ./dataStructure
 ##### 提供了一个存储数据库的结构
@@ -127,26 +174,6 @@ form(document.getElementById('rg-content'));
 - 方法(未整理)
 ```
 add, check, show, hide, gGetData, gCacheHtml, external, debug, html, remove, init
-```
-## ./attribute
-##### 对传统getAttribute及setAttribute进行封装, 不再从元素中进行读取和存储, 使读数据速度更快, 存储时也可以存储任何内容
-- set
-```
- attr(element).set('key', new Date);
- // or
- attr(element).set({key: new Date});
-```
-
-- get
-```
- attr(element).get('key'); // Thu Mar 23 2017 11:47:10 GMT+0800 (中国标准时间)
- // or
- attr(element).get().key; // Thu Mar 23 2017 11:47:10 GMT+0800 (中国标准时间)
-```
-
-- has
-```
- attr(element).has('key'); // true
 ```
 
 ## 更多
