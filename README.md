@@ -111,6 +111,7 @@ request({
 
 ## ./error
 ##### 一个提供抛出一组错误的error.js文件
+##### 手动抛出异常
 - 格式为 throwError('组标题', '错误日志[数组]', '类型,可选[error, log, info]');
 ```
     throwError('error',[
@@ -119,6 +120,15 @@ request({
         'log: xxxxx'
     ], 'log');
 ```
+
+##### 设置抛出异常的几种模式
+    1. THROW 原生抛出模式
+
+    2. HIDE  隐藏模式
+    3. SHOW  抛出模式 (默认的)
+
+##### 如何设置
+
 
 ## ./formSubmit
 ##### 使用原生javascript 实现获取一个表单元素, 并且做出一系列扩展, 支持脱离form 菜单
