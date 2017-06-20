@@ -186,5 +186,15 @@ getStyle(dom, 'height');
 add, check, show, hide, gGetData, gCacheHtml, external, debug, html, remove, init
 ```
 
+## ./timeStamp
+##### 获取时间戳, 可以获取年, 季, 月, 周, 日的随意组合, 并转换成时间戳
+- getTimeStamp() 传入'xxx年xx月' 格式的内容
+返回
+    - error: 如果出错返回true
+    - time: 时间戳
+    - timeString: 输入的内容
+    - date: 最终的Date对象, 如果出错不返回
+    - company: 最大单位, 如果出错不返回
+
 ## 更多
 ##### 更多使用功能正在整理中...
